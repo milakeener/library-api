@@ -1,0 +1,30 @@
+{
+  "name": "library-api",
+  "version": "1.0.0",
+  "description": "ITIS 4166-051 Team 19 Final Project",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/milakeener/library-api.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/milakeener/library-api/issues"
+  },
+  "homepage": "https://github.com/milakeener/library-api#readme",
+  "devDependencies": {
+    "prisma": "^6.19.0"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.0"
+  }
+}
