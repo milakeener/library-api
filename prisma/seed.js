@@ -6,8 +6,11 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Starting database seeding...');
 
-  // Clear existing users
+  // Clear existing data in FK-safe order
   console.log('Clearing existing users...');
+  await prisma.review.deleteMany();
+  await prisma.book.deleteMany();
+  await prisma.author.deleteMany();
   await prisma.user.deleteMany();
 
   // Create sample users with different roles
@@ -51,6 +54,47 @@ async function main() {
     });
     console.log(`✓ Created ${user.role}: ${user.email}`);
   }
+
+  // Fetch one of the users to use for the review (Regular User)
+  const regularUser = await prisma.user.findUnique({
+    where: { email: 'user@library.com' },
+  });
+
+  // Create an author
+  console.log('\nCreating sample author...');
+  const author = await prisma.author.create({
+    data: {
+      name: 'Frank Herbert',
+      bio: 'American science-fiction author best known for the novel Dune.',
+    },
+  });
+  console.log(`✓ Created author: ${author.name} (id: ${author.id})`);
+
+  // Create a book linked to that author
+  console.log('\nCreating sample book...');
+  const book = await prisma.book.create({
+    data: {
+      title: 'Dune',
+      genre: 'Science Fiction',
+      authorId: author.id,
+      reviewScore: 4.5,
+    },
+  });
+  console.log(`✓ Created book: ${book.title} (id: ${book.id})`);
+
+  // Create a review linked to the book and the regular user
+  console.log('\nCreating sample review...');
+  const review = await prisma.review.create({
+    data: {
+      rating: 5,
+      comment: 'An incredible sci-fi epic with deep world-building.',
+      bookId: book.id,
+      userId: regularUser.id,
+    },
+  });
+  console.log(
+    `✓ Created review (rating: ${review.rating}) for book id ${book.id} by user id ${regularUser.id}`
+  );
 
   console.log('\nSeeding completed successfully!');
   console.log('\nSample credentials:');
