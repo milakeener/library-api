@@ -7,7 +7,7 @@ async function main() {
   console.log('Starting database seeding...');
 
   // Clear existing data in FK-safe order
-  console.log('Clearing existing users...');
+  console.log('Clearing existing data...');
   await prisma.review.deleteMany();
   await prisma.book.deleteMany();
   await prisma.author.deleteMany();
