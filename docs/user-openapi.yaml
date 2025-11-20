@@ -1,28 +1,29 @@
-openapi: 3.0.3openapi: 3.0.3
+openapi: 3.0.3
 
-info:info:
+info:
 
-  title: Library API - User Endpoints  title: Library API - Users
+  title: Library API - User Endpoints  
 
-  version: 1.0.0  version: '1.0.0'
+  version: 1.0.0  
 
-  description: User resource endpoints with JWT authentication  description: User endpoints for the Library API (signup, login, profile) — Week 2 deliverable
+  description: User resource endpoints with JWT authentication  
 
-servers:servers:
+servers:
 
-  - url: http://localhost:3000  - url: http://localhost:3000
+  - url: http://localhost:3000 
 
-components:components:
+components:
 
-  securitySchemes:  securitySchemes:
+  securitySchemes: 
 
-    bearerAuth:    bearerAuth:
+    bearerAuth:  
 
-      type: http      type: http
+      type: http     
 
-      scheme: bearer      scheme: bearer
+      scheme: bearer      
+      
+      bearerFormat: JWT     
 
-      bearerFormat: JWT      bearerFormat: JWT
 
 paths:  schemas:
 
