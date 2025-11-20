@@ -35,7 +35,6 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "test": "jest",
-    "seed": "node prisma/seed.js"
+    "test": "jest"
   }
 }
