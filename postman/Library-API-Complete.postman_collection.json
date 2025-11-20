@@ -1,0 +1,499 @@
+{
+  "info": {
+    "name": "Library API - Complete Collection",
+    "description": "Complete Postman collection for Library API with success and failure scenarios. Organized by resource with authentication/authorization requirements clearly labeled.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "description": "User authentication endpoints - signup and login",
+      "item": [
+        {
+          "name": "Signup - Success",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/signup",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "signup"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"New User\",\n  \"email\": \"newuser@example.com\",\n  \"password\": \"SecurePass123!\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Signup - Missing Name (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/signup",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "signup"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"Password123!\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Signup - Missing Email (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/signup",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "signup"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test User\",\n  \"password\": \"Password123!\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Signup - Duplicate Email (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/signup",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "signup"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Duplicate User\",\n  \"email\": \"user@library.com\",\n  \"password\": \"Password123!\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('accessToken', jsonData.accessToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@library.com\",\n  \"password\": \"User123!\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Wrong Password (401)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@library.com\",\n  \"password\": \"WrongPassword!\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Non-existent User (401)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nonexistent@example.com\",\n  \"password\": \"SomePassword!\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Missing Email (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"Password123!\"\n}"
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "description": "User resource endpoints - requires authentication",
+      "item": [
+        {
+          "name": "Get Current User - Success (Auth Required)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "JWT token from login"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "me"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User - No Token (401)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "me"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User - Invalid Token (401)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer invalid.token.here"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "me"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Books",
+      "description": "Book resource endpoints - GET is public, write operations require LIBRARIAN or ADMIN role",
+      "item": [
+        {
+          "name": "List All Books - Success (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/books",
+              "host": ["{{baseUrl}}"],
+              "path": ["books"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Book by ID - Success (Public)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/books/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["books", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Book by ID - Not Found (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/books/9999",
+              "host": ["{{baseUrl}}"],
+              "path": ["books", "9999"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Book - Success (Librarian/Admin Auth Required)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "Requires LIBRARIAN or ADMIN role"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/books",
+              "host": ["{{baseUrl}}"],
+              "path": ["books"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"New Book Title\",\n  \"genre\": \"Fiction\",\n  \"authorId\": 1\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Book - No Auth (401)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/books",
+              "host": ["{{baseUrl}}"],
+              "path": ["books"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Unauthorized Book\",\n  \"genre\": \"Fiction\",\n  \"authorId\": 1\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Book - Missing Title (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/books",
+              "host": ["{{baseUrl}}"],
+              "path": ["books"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"genre\": \"Fiction\",\n  \"authorId\": 1\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Book - Invalid Author (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/books",
+              "host": ["{{baseUrl}}"],
+              "path": ["books"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Book with Bad Author\",\n  \"genre\": \"Fiction\",\n  \"authorId\": 9999\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Book - Success (Librarian/Admin Auth Required)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "Requires LIBRARIAN or ADMIN role"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/books/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["books", "1"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Book Title\",\n  \"genre\": \"Science Fiction\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Book - Not Found (404)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/books/9999",
+              "host": ["{{baseUrl}}"],
+              "path": ["books", "9999"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Non-existent Book\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Book - Success (Librarian/Admin Auth Required)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "Requires LIBRARIAN or ADMIN role"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/books/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["books", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Book - No Auth (401)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/books/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["books", "1"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ]
+}
