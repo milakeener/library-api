@@ -1,6 +1,6 @@
 openapi: 3.0.3
 
-info:info:
+info:
 
   title: Library API - User Endpoints  
 
@@ -23,6 +23,7 @@ components:
       scheme: bearer      
       
       bearerFormat: JWT     
+
 
 paths:  schemas:
 
