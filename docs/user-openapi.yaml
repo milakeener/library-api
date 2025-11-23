@@ -1,211 +1,551 @@
 openapi: 3.0.3
 
 info:
-
-  title: Library API - User Endpoints  
-
-  version: 1.0.0  
-
-  description: User resource endpoints with JWT authentication  
+  title: Library API
+  version: 1.0.0
+  description: User authentication, books, authors, and reviews endpoints for the Library API.
 
 servers:
-
-  - url: http://localhost:3000 
+  - url: http://localhost:3000
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
 
-  securitySchemes: 
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+          description: "Role of the user (USER | LIBRARIAN | ADMIN)"
+      required: [id, name, email]
 
-    bearerAuth:  
+    AuthRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required: [email, password]
 
-      type: http     
+    AuthResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+      required: [accessToken]
 
-      scheme: bearer      
-      
-      bearerFormat: JWT     
+    Author:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        bio:
+          type: string
+      required: [id, name]
 
+    Book:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        genre:
+          type: string
+        reviewScore:
+          type: number
+        author:
+          $ref: "#/components/schemas/Author"
+      required: [id, title]
 
-paths:  schemas:
+    ReviewUser:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+      required: [id, name]
 
-  /auth/signup:    User:
+    Review:
+      type: object
+      properties:
+        id:
+          type: integer
+        bookId:
+          type: integer
+        rating:
+          type: integer
+        comment:
+          type: string
+        user:
+          $ref: "#/components/schemas/ReviewUser"
+      required: [id, bookId, rating]
 
-    post:      type: object
-
-      summary: Register a new user      properties:
-
-      requestBody:        id:
-
-        required: true          type: integer
-
-        content:        name:
-
-          application/json:          type: string
-
-            schema:        email:
-
-              type: object          type: string
-
-              required: [name, email, password]        role:
-
-              properties:          type: string
-
-                name:          description: Role of the user (USER | LIBRARIAN | ADMIN)
-
-                  type: string      required: [id, name, email]
-
+paths:
+  # ================
+  # Auth & User
+  # ================
+  /auth/signup:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password]
+              properties:
+                name:
+                  type: string
                 email:
-
-                  type: string    AuthRequest:
-
-                password:      type: object
-
-                  type: string      properties:
-
-            example:        email:
-
-              name: Test User          type: string
-
-              email: test@example.com        password:
-
-              password: Password123!          type: string
-
-      responses:      required: [email, password]
-
-        '201':
-
-          description: User created    AuthResponse:
-
-          content:      type: object
-
-            application/json:      properties:
-
-              schema:        accessToken:
-
-                type: object          type: string
-
-                properties:
-
-                  id:paths:
-
-                    type: integer  /auth/signup:
-
-                  name:    post:
-
-                    type: string      summary: Create a new user
-
-                  email:      requestBody:
-
-                    type: string        required: true
-
-  /auth/login:        content:
-
-    post:          application/json:
-
-      summary: Login and get JWT            schema:
-
-      requestBody:              type: object
-
-        required: true              properties:
-
-        content:                name:
-
-          application/json:                  type: string
-
-            schema:                email:
-
-              type: object                  type: string
-
-              required: [email, password]                password:
-
-              properties:                  type: string
-
-                email:              required: [name, email, password]
-
-                  type: string            example:
-
-                password:              name: Caleb Vannoy
-
-                  type: string              email: caleb@example.com
-
-            example:              password: Ex@mple!
-
-              email: test@example.com      responses:
-
-              password: Password123!        '201':
-
-      responses:          description: Created user
-
-        '200':          content:
-
-          description: JWT token            application/json:
-
-          content:              schema:
-
-            application/json:                $ref: '#/components/schemas/User'
-
-              schema:
-
-                type: object  /auth/login:
-
-                properties:    post:
-
-                  accessToken:      summary: Login and receive JWT access token
-
-                    type: string      requestBody:
-
-  /users/me:        required: true
-
-    get:        content:
-
-      summary: Get current user info          application/json:
-
-      security:            schema:
-
-        - bearerAuth: []              $ref: '#/components/schemas/AuthRequest'
-
-      responses:            example:
-
-        '200':              email: caleb@example.com
-
-          description: User info              password: Ex@mple!
-
-          content:      responses:
-
-            application/json:        '200':
-
-              schema:          description: Access token
-
-                type: object          content:
-
-                properties:            application/json:
-
-                  id:              schema:
-
-                    type: integer                $ref: '#/components/schemas/AuthResponse'
-
-                  name:
-
-                    type: string  /users/me:
-
-                  email:    get:
-
-                    type: string      summary: Get current authenticated user
-
-                  role:      security:
-
-                    type: string        - bearerAuth: []
-
-        '401':      responses:
-
-          description: Unauthorized        '200':
-
-          description: Current user
+                  type: string
+                password:
+                  type: string
+            example:
+              name: Test User
+              email: test@example.com
+              password: Password123!
+      responses:
+        "201":
+          description: User created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-        '401':
+                $ref: "#/components/schemas/User"
+
+  /auth/login:
+    post:
+      summary: Login and receive JWT access token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthRequest"
+            example:
+              email: caleb@example.com
+              password: Ex@mple!
+      responses:
+        "200":
+          description: Access token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+
+  /users/me:
+    get:
+      summary: Get current authenticated user
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Current user profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
           description: Unauthorized
+
+  # ================
+  # Books
+  # ================
+  /books:
+    get:
+      summary: Get all books
+      responses:
+        "200":
+          description: List of all books
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Book"
+
+    post:
+      summary: Create a new book (librarian or admin)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, authorId]
+              properties:
+                title:
+                  type: string
+                genre:
+                  type: string
+                authorId:
+                  type: integer
+            example:
+              title: "Test Book 2"
+              genre: "Example Genre"
+              authorId: 3
+      responses:
+        "201":
+          description: Book created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Book"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (requires LIBRARIAN or ADMIN)
+
+  /books/{id}:
+    get:
+      summary: Get a single book by ID
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Book ID
+      responses:
+        "200":
+          description: Book found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Book"
+        "404":
+          description: Book not found
+
+    put:
+      summary: Update a book (librarian or admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Book ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                genre:
+                  type: string
+                authorId:
+                  type: integer
+            example:
+              title: "Updated Book Title"
+              genre: "Updated Genre"
+              authorId: 4
+      responses:
+        "200":
+          description: Updated book
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Book"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Book not found
+
+    delete:
+      summary: Delete a book (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Book ID
+      responses:
+        "204":
+          description: Book deleted
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Book not found
+
+  # ================
+  # Authors
+  # ================
+  /authors:
+    get:
+      summary: Get all authors
+      responses:
+        "200":
+          description: List of authors
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Author"
+
+    post:
+      summary: Create a new author (librarian or admin)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                bio:
+                  type: string
+            example:
+              name: "Author 2"
+              bio: "Short biography"
+      responses:
+        "201":
+          description: Author created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Author"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+
+  /authors/{id}:
+    get:
+      summary: Get a single author by ID
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Author ID
+      responses:
+        "200":
+          description: Author found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Author"
+        "404":
+          description: Author not found
+
+    put:
+      summary: Update an author (librarian or admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Author ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                bio:
+                  type: string
+            example:
+              name: "Author 3"
+              bio: "Updated author bio"
+      responses:
+        "200":
+          description: Author updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Author"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Author not found
+
+    delete:
+      summary: Delete an author (admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Author ID
+      responses:
+        "204":
+          description: Author deleted
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Author not found
+
+  # ================
+  # Reviews
+  # ================
+  /books/{id}/reviews:
+    get:
+      summary: Get all reviews for a specific book
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Book ID
+      responses:
+        "200":
+          description: List of reviews for the book
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Review"
+        "404":
+          description: Book not found
+
+  /reviews:
+    post:
+      summary: Create a new review for a book (authenticated user)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [bookId, rating, comment]
+              properties:
+                bookId:
+                  type: integer
+                rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                comment:
+                  type: string
+            example:
+              bookId: 1
+              rating: 5
+              comment: "Great book!"
+      responses:
+        "201":
+          description: Review created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
+        "401":
+          description: Unauthorized
+
+  /reviews/{id}:
+    put:
+      summary: Update a review (owner or admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Review ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                comment:
+                  type: string
+            example:
+              rating: 3
+              comment: "Updated review text"
+      responses:
+        "200":
+          description: Review updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Review not found
+
+    delete:
+      summary: Delete a review (owner or admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Review ID
+      responses:
+        "204":
+          description: Review deleted
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Review not found
 
 security:
   - {}
