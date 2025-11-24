@@ -29,10 +29,12 @@ app.use('/api-docs', swaggerRoutes);
 const userRoutes = require('./routes/userRoutes');
 const bookRoutes = require('./routes/bookRoutes');
 const authorRoutes = require('./routes/authorRoutes');
+const reviewRoutes = require('./routes/reviewRoutes');
 
 app.use('/', userRoutes);
 app.use('/books', bookRoutes);
 app.use('/authors', authorRoutes);
+app.use('/', reviewRoutes);
 
 // basic health
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
