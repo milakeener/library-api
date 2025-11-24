@@ -9,10 +9,10 @@ const {
 
 const router = express.Router();
 
-router.get('/', getAllAuthors);
-router.get('/:id', getAuthorById);
-router.post('/', createAuthor);
-router.put('/:id', updateAuthor);
-router.delete('/:id', deleteAuthor);
+router.get('/', authenticate, authorizeRoles('USER', 'LIBRARIAN', 'ADMIN'),getAllAuthors);
+router.get('/:id', authenticate, authorizeRoles('USER', 'LIBRARIAN', 'ADMIN'), getAuthorById);
+router.post('/', authenticate, authorizeRoles('LIBRARIAN', 'ADMIN'), createAuthor);
+router.put('/:id', authenticate, authorizeRoles('LIBRARIAN', 'ADMIN'), updateAuthor);
+router.delete('/:id', authenticate, authorizeRoles('ADMIN'), deleteAuthor);
 
 module.exports = router;
