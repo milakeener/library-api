@@ -7,6 +7,8 @@ const {
   deleteAuthor,
 } = require('../controllers/authorController');
 
+const { authenticate, authorizeRoles } = require('../middleware/authMiddleware');
+
 const router = express.Router();
 
 router.get('/', authenticate, authorizeRoles('USER', 'LIBRARIAN', 'ADMIN'),getAllAuthors);
