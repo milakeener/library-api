@@ -467,4 +467,4 @@ components:
         bio:
           type: string
           example: American science-fiction author best known for the novel Dune.
-          example: Invalid credentials
+         
