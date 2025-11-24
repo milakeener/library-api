@@ -10,7 +10,7 @@
       "description": "User authentication endpoints - signup and login",
       "item": [
         {
-          "name": "Signup - Success",
+          "name": "POST /auth/signup - Create user account (Success)",
           "request": {
             "method": "POST",
             "header": [
@@ -32,7 +32,7 @@
           "response": []
         },
         {
-          "name": "Signup - Missing Name (400)",
+          "name": "POST /auth/signup - Missing name (400 Error)",
           "request": {
             "method": "POST",
             "header": [
@@ -54,29 +54,7 @@
           "response": []
         },
         {
-          "name": "Signup - Missing Email (400)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/auth/signup",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "signup"]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Test User\",\n  \"password\": \"Password123!\"\n}"
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Signup - Duplicate Email (409)",
+          "name": "POST /auth/signup - Duplicate email (409 Error)",
           "request": {
             "method": "POST",
             "header": [
@@ -98,7 +76,7 @@
           "response": []
         },
         {
-          "name": "Login - Success",
+          "name": "POST /auth/login - Obtain JWT token (Success)",
           "event": [
             {
               "listen": "test",
@@ -106,7 +84,7 @@
                 "exec": [
                   "if (pm.response.code === 200) {",
                   "    var jsonData = pm.response.json();",
-                  "    pm.environment.set('accessToken', jsonData.accessToken);",
+                  "    pm.environment.set('accessToken', jsonData.token);",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -128,13 +106,13 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"user@library.com\",\n  \"password\": \"User123!\"\n}"
+              "raw": "{\n  \"email\": \"admin@library.com\",\n  \"password\": \"Admin123!\"\n}"
             }
           },
           "response": []
         },
         {
-          "name": "Login - Wrong Password (401)",
+          "name": "POST /auth/login - Wrong password (401 Error)",
           "request": {
             "method": "POST",
             "header": [
@@ -154,66 +132,22 @@
             }
           },
           "response": []
-        },
-        {
-          "name": "Login - Non-existent User (401)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/auth/login",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "login"]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"nonexistent@example.com\",\n  \"password\": \"SomePassword!\"\n}"
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Login - Missing Email (400)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/auth/login",
-              "host": ["{{baseUrl}}"],
-              "path": ["auth", "login"]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"password\": \"Password123!\"\n}"
-            }
-          },
-          "response": []
         }
       ]
     },
     {
-      "name": "User",
-      "description": "User resource endpoints - requires authentication",
+      "name": "Users",
+      "description": "User profile endpoints - all require authentication",
       "item": [
         {
-          "name": "Get Current User - Success (Auth Required)",
+          "name": "GET /users/me - Get current user profile (Success - Auth Required)",
           "request": {
             "method": "GET",
             "header": [
               {
                 "key": "Authorization",
                 "value": "Bearer {{accessToken}}",
-                "description": "JWT token from login"
+                "description": "JWT token from login - REQUIRED"
               }
             ],
             "url": {
@@ -225,7 +159,7 @@
           "response": []
         },
         {
-          "name": "Get Current User - No Token (401)",
+          "name": "GET /users/me - No token (401 Error)",
           "request": {
             "method": "GET",
             "header": [],
@@ -238,7 +172,7 @@
           "response": []
         },
         {
-          "name": "Get Current User - Invalid Token (401)",
+          "name": "GET /users/me - Invalid token (401 Error)",
           "request": {
             "method": "GET",
             "header": [
@@ -259,13 +193,19 @@
     },
     {
       "name": "Books",
-      "description": "Book resource endpoints - GET is public, write operations require LIBRARIAN or ADMIN role",
+      "description": "Book resource endpoints - View: Auth Required | Create/Update: LIBRARIAN or ADMIN | Delete: ADMIN only",
       "item": [
         {
-          "name": "List All Books - Success (Public)",
+          "name": "GET /books - List all books (Success - Auth Required)",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "Auth Required"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/books",
               "host": ["{{baseUrl}}"],
@@ -275,10 +215,15 @@
           "response": []
         },
         {
-          "name": "Get Book by ID - Success (Public)",
+          "name": "GET /books/:id - Get book by ID (Success - Auth Required)",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/books/1",
               "host": ["{{baseUrl}}"],
@@ -288,10 +233,15 @@
           "response": []
         },
         {
-          "name": "Get Book by ID - Not Found (404)",
+          "name": "GET /books/:id - Book not found (404 Error)",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/books/9999",
               "host": ["{{baseUrl}}"],
@@ -301,7 +251,7 @@
           "response": []
         },
         {
-          "name": "Create Book - Success (Librarian/Admin Auth Required)",
+          "name": "POST /books - Create book (Success - LIBRARIAN or ADMIN only)",
           "request": {
             "method": "POST",
             "header": [
@@ -328,7 +278,7 @@
           "response": []
         },
         {
-          "name": "Create Book - No Auth (401)",
+          "name": "POST /books - No authentication (401 Error)",
           "request": {
             "method": "POST",
             "header": [
@@ -350,7 +300,7 @@
           "response": []
         },
         {
-          "name": "Create Book - Missing Title (400)",
+          "name": "POST /books - Missing required field (400 Error)",
           "request": {
             "method": "POST",
             "header": [
@@ -376,33 +326,7 @@
           "response": []
         },
         {
-          "name": "Create Book - Invalid Author (400)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{accessToken}}"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/books",
-              "host": ["{{baseUrl}}"],
-              "path": ["books"]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"title\": \"Book with Bad Author\",\n  \"genre\": \"Fiction\",\n  \"authorId\": 9999\n}"
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Update Book - Success (Librarian/Admin Auth Required)",
+          "name": "PUT /books/:id - Update book (Success - LIBRARIAN or ADMIN only)",
           "request": {
             "method": "PUT",
             "header": [
@@ -429,7 +353,7 @@
           "response": []
         },
         {
-          "name": "Update Book - Not Found (404)",
+          "name": "PUT /books/:id - Book not found (404 Error)",
           "request": {
             "method": "PUT",
             "header": [
@@ -455,14 +379,14 @@
           "response": []
         },
         {
-          "name": "Delete Book - Success (Librarian/Admin Auth Required)",
+          "name": "DELETE /books/:id - Delete book (Success - ADMIN only)",
           "request": {
             "method": "DELETE",
             "header": [
               {
                 "key": "Authorization",
                 "value": "Bearer {{accessToken}}",
-                "description": "Requires LIBRARIAN or ADMIN role"
+                "description": "Requires ADMIN role"
               }
             ],
             "url": {
@@ -474,7 +398,7 @@
           "response": []
         },
         {
-          "name": "Delete Book - No Auth (401)",
+          "name": "DELETE /books/:id - No authentication (401 Error)",
           "request": {
             "method": "DELETE",
             "header": [],
@@ -487,12 +411,374 @@
           "response": []
         }
       ]
+    },
+    {
+      "name": "Authors",
+      "description": "Author resource endpoints - all operations available",
+      "item": [
+        {
+          "name": "GET /authors - List all authors (Success)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/authors",
+              "host": ["{{baseUrl}}"],
+              "path": ["authors"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /authors/:id - Get author by ID (Success)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/authors/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["authors", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /authors/:id - Author not found (404 Error)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/authors/9999",
+              "host": ["{{baseUrl}}"],
+              "path": ["authors", "9999"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /authors - Create author (Success)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/authors",
+              "host": ["{{baseUrl}}"],
+              "path": ["authors"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Isaac Asimov\",\n  \"bio\": \"American writer and professor of biochemistry, best known for science fiction works.\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /authors - Missing name (400 Error)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/authors",
+              "host": ["{{baseUrl}}"],
+              "path": ["authors"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bio\": \"Some bio without a name\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT /authors/:id - Update author (Success)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/authors/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["authors", "1"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Frank Herbert\",\n  \"bio\": \"Updated bio - American science-fiction author best known for Dune.\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT /authors/:id - Author not found (404 Error)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/authors/9999",
+              "host": ["{{baseUrl}}"],
+              "path": ["authors", "9999"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Non-existent Author\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE /authors/:id - Delete author (Success)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/authors/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["authors", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE /authors/:id - Author not found (404 Error)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/authors/9999",
+              "host": ["{{baseUrl}}"],
+              "path": ["authors", "9999"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Reviews",
+      "description": "Review resource endpoints - all require authentication (USER, LIBRARIAN, or ADMIN)",
+      "item": [
+        {
+          "name": "GET /books/:bookId/reviews - Get reviews for book (Success - Auth Required)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "Auth Required"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/books/1/reviews",
+              "host": ["{{baseUrl}}"],
+              "path": ["books", "1", "reviews"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /books/:bookId/reviews - No authentication (401 Error)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/books/1/reviews",
+              "host": ["{{baseUrl}}"],
+              "path": ["books", "1", "reviews"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /reviews - Create review (Success - Auth Required)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "Auth Required"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reviews",
+              "host": ["{{baseUrl}}"],
+              "path": ["reviews"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bookId\": 1,\n  \"rating\": 5,\n  \"comment\": \"Excellent book! Highly recommended.\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /reviews - Missing required field (400 Error)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reviews",
+              "host": ["{{baseUrl}}"],
+              "path": ["reviews"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comment\": \"Missing bookId and rating\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /reviews - No authentication (401 Error)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reviews",
+              "host": ["{{baseUrl}}"],
+              "path": ["reviews"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bookId\": 1,\n  \"rating\": 4,\n  \"comment\": \"Unauthorized review\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT /reviews/:id - Update review (Success - Owner or Admin only)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "Must be review owner or ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reviews/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["reviews", "1"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 4,\n  \"comment\": \"Updated review - still great but not perfect.\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT /reviews/:id - Not owner (403 Error)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reviews/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["reviews", "1"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 1,\n  \"comment\": \"Trying to update someone else's review\"\n}"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE /reviews/:id - Delete review (Success - Owner or Admin only)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "Must be review owner or ADMIN"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reviews/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["reviews", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE /reviews/:id - Review not found (404 Error)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reviews/9999",
+              "host": ["{{baseUrl}}"],
+              "path": ["reviews", "9999"]
+            }
+          },
+          "response": []
+        }
+      ]
     }
   ],
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:3000",
+      "value": "https://library-api-2m4p.onrender.com",
       "type": "string"
     }
   ]
